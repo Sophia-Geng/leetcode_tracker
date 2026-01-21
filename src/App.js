@@ -15,7 +15,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const types = ['数组', '哈希表', '双指针', '滑动窗口', '链表', '二叉树', 'DFS/BFS', '动态规划', '回溯', '贪心', '堆/栈', '图', '字符串', '二分查找', '其他'];
+  const types = ['数组', '哈希表', '双指针', '滑动窗口', '链表', '二叉树', 'DFS/BFS', '动态规划', '回溯', '贪心', '堆/栈', '图', '字符串', '二分查找', '迭代', '其他'];
   const difficulties = ['Easy', 'Medium', 'Hard'];
 
   // 从 Supabase 加载数据
