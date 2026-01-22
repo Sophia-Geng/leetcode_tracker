@@ -11,7 +11,7 @@ function App() {
   const [showExport, setShowExport] = useState(false);
   const [importData, setImportData] = useState('');
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ types: [], difficulty: '', notes: '' });
+  const [editForm, setEditForm] = useState({ problemId: '', types: [], difficulty: '', notes: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -220,6 +220,7 @@ function App() {
   const startEdit = (problem) => {
     setEditingId(problem.id);
     setEditForm({
+      problemId: problem.id.toString(),
       types: problem.types || [],
       difficulty: problem.difficulty,
       notes: problem.notes || ''
@@ -231,12 +232,25 @@ function App() {
       alert('请至少选择一个类型');
       return;
     }
+    
+    const newProblemId = parseInt(editForm.problemId);
+    if (!newProblemId || newProblemId <= 0) {
+      alert('请输入有效的题号');
+      return;
+    }
+    
+    // 检查新题号是否与其他题目冲突
+    if (newProblemId !== problemId && problems.find(p => p.id === newProblemId)) {
+      alert('题号已存在！');
+      return;
+    }
 
     try {
       setSaving(true);
       const { error } = await supabase
         .from('problems')
         .update({
+          problem_id: newProblemId,
           types: editForm.types,
           difficulty: editForm.difficulty,
           notes: editForm.notes
@@ -249,13 +263,14 @@ function App() {
         if (p.id === problemId) {
           return {
             ...p,
+            id: newProblemId,
             types: editForm.types,
             difficulty: editForm.difficulty,
             notes: editForm.notes
           };
         }
         return p;
-      }));
+      }).sort((a, b) => a.id - b.id));
       setEditingId(null);
     } catch (error) {
       console.error('保存失败:', error);
@@ -676,6 +691,17 @@ function App() {
                 {/* 编辑模式 */}
                 {isEditing ? (
                   <div style={{ background: '#f9fafb', padding: '12px', borderRadius: '8px', marginBottom: '10px' }}>
+                    {/* 题号 */}
+                    <div style={{ marginBottom: '10px' }}>
+                      <div style={{ fontSize: '12px', color: '#374151', marginBottom: '6px' }}>题号</div>
+                      <input
+                        type="number"
+                        value={editForm.problemId}
+                        onChange={(e) => setEditForm({...editForm, problemId: e.target.value})}
+                        style={{ width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '5px', fontSize: '13px', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    
                     <div style={{ marginBottom: '10px' }}>
                       <div style={{ fontSize: '12px', color: '#374151', marginBottom: '6px' }}>类型（可多选）</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
